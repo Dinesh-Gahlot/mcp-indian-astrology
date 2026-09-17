@@ -1,5 +1,11 @@
 # Changelog
 
+## [2.9.1] - 2026-09-17
+
+### Fixed
+
+**Pinned `mcp[cli]` to `<2`.** The dependency was `>=1.2.0` with no upper bound. mcp 2.x renamed `FastMCP` to `MCPServer` and removed `mcp.server.fastmcp`, which `server.py` imports at module level, so any image rebuild would have installed mcp 2.x and crashed the container on startup. Production runs 1.28.1. No behaviour change — this only prevents a future rebuild from breaking.
+
 ## [Unreleased]
 
 ### Fixed
