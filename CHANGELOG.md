@@ -1,5 +1,25 @@
 # Changelog
 
+## [2.10.0] - 2026-09-17
+
+### Added
+
+**`include_name` and `lan` on all six festival tools (DV-352).** The festival APIs gained two optional parameters; none of the MCP's festival tools could pass either, because the Pydantic models use `extra="forbid"`.
+
+`include_name` adds a human-readable `name` to every festival (`"Anant Chaturdashi"` instead of only the raw key `anant_chaturdashi`) — the gap the client reported in DV-338. `lan` localises those names into eight languages.
+
+Affected tools: `divine_get_festivals_by_date`, `divine_get_english_calendar_festivals`, `divine_get_malayalam_festivals`, `divine_get_tamil_festivals`, `divine_get_sankranti_festivals`, `divine_get_festivals_by_month`.
+
+**`include_name` defaults to `YES` in the MCP**, which differs from the REST API default of `NO`. The API default exists to protect existing REST consumers from a new response field; an MCP result is read by a model, where an extra field cannot break a parser and raw keys like `chhath_puja` are actively worse. Pass `include_name="NO"` for the old shape.
+
+**Five of the six festival tools previously had no `lan` parameter at all**, so festivals could not be localised through the MCP regardless of this change. They do now.
+
+### Fixed
+
+**`PanchangInput.lan` advertised seven language codes the API rejects.** The description read `en, hi, ta, te, kn, ml, bn, gu, mr, pa, or, ur`. Verified 2026-09-17 against astroapi-1 `/find-panchang` and astroapi-3 (every festival endpoint): the APIs accept **`en, hi, bn, ma, tm, tl, ml, kn`** and reject `ta`, `te`, `mr`, `gu`, `pa`, `or`, `ur` with `"Please enter valid language"`.
+
+These are deliberately **not** ISO 639-1 codes — Marathi is `ma` not `mr`, Tamil `tm` not `ta`, Telugu `tl` not `te`. The old description steered callers to codes that always failed. Invalid codes are now rejected locally with the correct list instead of costing a round trip.
+
 ## [2.9.1] - 2026-09-17
 
 ### Fixed
