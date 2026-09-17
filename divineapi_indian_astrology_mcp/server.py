@@ -271,6 +271,72 @@ VALID_HINDU_MONTHS = {
     "ashvina", "kartika",
 }
 
+# ── Festival display options (DV-352) ──
+# The festival and panchang APIs accept these eight language codes ONLY.
+# Verified 2026-09-17 against astroapi-1 (/find-panchang) and astroapi-3 (all
+# festival endpoints). They are NOT ISO 639-1: Marathi is "ma" (not "mr"),
+# Tamil "tm" (not "ta"), Telugu "tl" (not "te"). The ISO forms — and gu, pa,
+# or, ur — are rejected upstream with "Please enter valid language".
+VALID_LANGUAGES = {"en", "hi", "bn", "ma", "tm", "tl", "ml", "kn"}
+LANGUAGE_HINT = (
+    "Language code for festival names (default 'en'). One of: en (English), "
+    "hi (Hindi), bn (Bengali), ma (Marathi), tm (Tamil), tl (Telugu), "
+    "ml (Malayalam), kn (Kannada). Note these are not ISO codes - use 'ma', "
+    "'tm', 'tl', not 'mr', 'ta', 'te'."
+)
+VALID_INCLUDE_NAME = {"YES", "NO"}
+INCLUDE_NAME_HINT = (
+    "Add a human-readable 'name' to every festival, localised by 'lan' "
+    "(e.g. 'Anant Chaturdashi', or 'अनंत चतुर्दशी' with lan='hi'). "
+    "'YES' (default here) or 'NO'. Without it the response carries only raw "
+    "keys such as anant_chaturdashi."
+)
+
+
+def _resolve_language(value: str | None) -> str:
+    """Normalise and validate a festival language code. Raises ValueError.
+
+    Non-string input (an unresolved pydantic FieldInfo when the tool function is
+    called directly rather than through the MCP layer) is treated as unset.
+    """
+    if not isinstance(value, str):
+        value = None
+    lan = (value or "en").strip().lower()
+    if lan not in VALID_LANGUAGES:
+        raise ValueError(
+            f"Invalid lan '{value}'. Must be one of: {', '.join(sorted(VALID_LANGUAGES))}. "
+            "These are not ISO codes - Marathi is 'ma', Tamil 'tm', Telugu 'tl'."
+        )
+    return lan
+
+
+def _resolve_include_name(value: str | None) -> str:
+    """Normalise and validate include_name. Raises ValueError.
+
+    Non-string input is treated as unset (see _resolve_language).
+    """
+    if not isinstance(value, str):
+        value = None
+    inc = (value or "YES").strip().upper()
+    if inc not in VALID_INCLUDE_NAME:
+        raise ValueError(f"Invalid include_name '{value}'. Must be 'YES' or 'NO'.")
+    return inc
+
+
+def _apply_festival_options(payload: dict, lan: str | None, include_name: str | None) -> str | None:
+    """Attach lan + include_name to a festival payload.
+
+    Returns an error string for the flat-argument tools (matching the style of
+    _apply_dominants_method), or None on success.
+    """
+    try:
+        payload["lan"] = _resolve_language(lan)
+        payload["include_name"] = _resolve_include_name(include_name)
+    except ValueError as e:
+        return f"Error: {e}"
+    return None
+
+
 VALID_PLANETS = {
     "sun", "moon", "mars", "mercury", "jupiter",
     "venus", "saturn", "rahu", "ketu",
@@ -334,7 +400,7 @@ class PanchangInput(BaseModel):
     lat: str = Field(..., description="Latitude of the place (e.g., '28.6139')")
     lon: str = Field(..., description="Longitude of the place (e.g., '77.2090')")
     tzone: str = Field(..., description="Timezone offset from UTC (e.g., '5.5' for IST)")
-    lan: str = Field(default="en", description="Language code for response (default 'en'). Supported: en, hi, ta, te, kn, ml, bn, gu, mr, pa, or, ur")
+    lan: str = Field(default="en", description="Language code for response (default 'en'). Supported: en, hi, bn, ma, tm, tl, ml, kn. Not ISO codes - Marathi is 'ma', Tamil 'tm', Telugu 'tl'; ta/te/mr/gu/pa/or/ur are rejected upstream.")
 
 
 class KundliInput(BaseModel):
@@ -399,6 +465,27 @@ class MatchmakingInput(BaseModel):
     p2_tzone: str = Field(..., description="Timezone of person 2 (e.g., '5.5')")
 
     lan: str = Field(default="en", description="Language code for response (default 'en')")
+
+
+class FestivalByDateInput(PanchangInput):
+    """Input for the date-specific festivals endpoint.
+
+    Extends PanchangInput with the festival display options. Deliberately a
+    subclass rather than new fields on PanchangInput: the panchang tools share
+    that model and do not accept include_name.
+    """
+
+    include_name: str = Field(default="YES", description=INCLUDE_NAME_HINT)
+
+    @field_validator("lan")
+    @classmethod
+    def validate_festival_lan(cls, v: str) -> str:
+        return _resolve_language(v)
+
+    @field_validator("include_name")
+    @classmethod
+    def validate_include_name(cls, v: str) -> str:
+        return _resolve_include_name(v)
 
 
 class FestivalInput(BaseModel):
@@ -1970,13 +2057,17 @@ async def divine_get_matching_planetary_positions(params: MatchmakingInput, ctx:
 
 
 @mcp.tool(name="divine_get_festivals_by_date", annotations=TOOL_ANNOTATIONS)
-async def divine_get_festivals_by_date(params: PanchangInput, ctx: Context) -> str:
+async def divine_get_festivals_by_date(params: FestivalByDateInput, ctx: Context) -> str:
     """Get festivals falling on a specific date.
 
     Returns all Hindu festivals and observances for a given date and location.
+    Each festival carries a human-readable 'name' unless include_name='NO',
+    localised by 'lan'.
     """
     api_key, auth_token = _get_credentials(ctx)
-    return await _call_divine_api("/indian-api/v1/date-specific-festivals", _panchang_payload(params), api_key=api_key, auth_token=auth_token)
+    payload = _panchang_payload(params)
+    payload["include_name"] = params.include_name
+    return await _call_divine_api("/indian-api/v1/date-specific-festivals", payload, api_key=api_key, auth_token=auth_token)
 
 
 @mcp.tool(name="divine_get_english_calendar_festivals", annotations=TOOL_ANNOTATIONS)
@@ -1987,6 +2078,8 @@ async def divine_get_english_calendar_festivals(
     lat: str = Field(..., description="Latitude (e.g., '28.6139')"),
     lon: str = Field(..., description="Longitude (e.g., '77.2090')"),
     tzone: str = Field(..., description="Timezone offset (e.g., '5.5')"),
+    lan: str = Field(default="en", description=LANGUAGE_HINT),
+    include_name: str = Field(default="YES", description=INCLUDE_NAME_HINT),
     ctx: Context = None,
 ) -> str:
     """Get all Hindu festivals for a specific English calendar month.
@@ -1994,6 +2087,9 @@ async def divine_get_english_calendar_festivals(
     Returns festivals falling within a given month of the Gregorian calendar.
     """
     payload = {"month": month, "year": year, "place": place, "lat": lat, "lon": lon, "tzone": tzone}
+    err = _apply_festival_options(payload, lan, include_name)
+    if err:
+        return err
     api_key, auth_token = _get_credentials(ctx)
     return await _call_divine_api("/indian-api/v1/english-calendar-festivals", payload, api_key=api_key, auth_token=auth_token)
 
@@ -2021,6 +2117,8 @@ async def divine_get_malayalam_festivals(
     lat: str = Field(..., description="Latitude (e.g., '28.6139')"),
     lon: str = Field(..., description="Longitude (e.g., '77.2090')"),
     tzone: str = Field(..., description="Timezone offset (e.g., '5.5')"),
+    lan: str = Field(default="en", description=LANGUAGE_HINT),
+    include_name: str = Field(default="YES", description=INCLUDE_NAME_HINT),
     ctx: Context = None,
 ) -> str:
     """Get major Malayalam (Kerala) festivals for a year.
@@ -2029,6 +2127,9 @@ async def divine_get_malayalam_festivals(
     Vilakku and other Kerala festivals with dates and images.
     """
     payload = {"year": year, "place": place, "lat": lat, "lon": lon, "tzone": tzone}
+    err = _apply_festival_options(payload, lan, include_name)
+    if err:
+        return err
     api_key, auth_token = _get_credentials(ctx)
     return await _call_divine_api("/indian-api/v1/malayalam-festivals", payload, api_key=api_key, auth_token=auth_token)
 
@@ -2040,6 +2141,8 @@ async def divine_get_tamil_festivals(
     lat: str = Field(..., description="Latitude (e.g., '28.6139')"),
     lon: str = Field(..., description="Longitude (e.g., '77.2090')"),
     tzone: str = Field(..., description="Timezone offset (e.g., '5.5')"),
+    lan: str = Field(default="en", description=LANGUAGE_HINT),
+    include_name: str = Field(default="YES", description=INCLUDE_NAME_HINT),
     ctx: Context = None,
 ) -> str:
     """Get major Tamil festivals for a year.
@@ -2049,6 +2152,9 @@ async def divine_get_tamil_festivals(
     dates and images.
     """
     payload = {"year": year, "place": place, "lat": lat, "lon": lon, "tzone": tzone}
+    err = _apply_festival_options(payload, lan, include_name)
+    if err:
+        return err
     api_key, auth_token = _get_credentials(ctx)
     return await _call_divine_api("/indian-api/v1/tamil-festivals", payload, api_key=api_key, auth_token=auth_token)
 
@@ -2060,6 +2166,8 @@ async def divine_get_sankranti_festivals(
     lat: str = Field(..., description="Latitude (e.g., '28.6139')"),
     lon: str = Field(..., description="Longitude (e.g., '77.2090')"),
     tzone: str = Field(..., description="Timezone offset (e.g., '5.5')"),
+    lan: str = Field(default="en", description=LANGUAGE_HINT),
+    include_name: str = Field(default="YES", description=INCLUDE_NAME_HINT),
     ctx: Context = None,
 ) -> str:
     """Get Sankranti festivals for a year.
@@ -2069,6 +2177,9 @@ async def divine_get_sankranti_festivals(
     (auspicious) windows.
     """
     payload = {"year": year, "place": place, "lat": lat, "lon": lon, "tzone": tzone}
+    err = _apply_festival_options(payload, lan, include_name)
+    if err:
+        return err
     api_key, auth_token = _get_credentials(ctx)
     return await _call_divine_api("/indian-api/v1/sankranti-festivals", payload, api_key=api_key, auth_token=auth_token)
 
@@ -2081,6 +2192,8 @@ async def divine_get_festivals_by_month(
     lat: str = Field(..., description="Latitude (e.g., '28.6139')"),
     lon: str = Field(..., description="Longitude (e.g., '77.2090')"),
     tzone: str = Field(..., description="Timezone offset (e.g., '5.5')"),
+    lan: str = Field(default="en", description=LANGUAGE_HINT),
+    include_name: str = Field(default="YES", description=INCLUDE_NAME_HINT),
     ctx: Context = None,
 ) -> str:
     """Get all Hindu festivals for a specific Hindu calendar month.
@@ -2108,6 +2221,9 @@ async def divine_get_festivals_by_month(
     }
 
     payload = {"year": year, "place": place, "lat": lat, "lon": lon, "tzone": tzone}
+    err = _apply_festival_options(payload, lan, include_name)
+    if err:
+        return err
     api_key, auth_token = _get_credentials(ctx)
     return await _call_divine_api(f"/indian-api/v2/{endpoint_map[month_lower]}", payload, api_key=api_key, auth_token=auth_token)
 
