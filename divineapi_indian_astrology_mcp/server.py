@@ -2205,19 +2205,31 @@ async def divine_get_festivals_by_month(
     if month_lower not in VALID_HINDU_MONTHS:
         return f"Error: Invalid Hindu month '{hindu_month}'. Must be one of: {', '.join(sorted(VALID_HINDU_MONTHS))}"
 
+    # Each month carries its own API version. Eleven are v2-only; shraavana is
+    # the sole month with a v3 (DV-374). In v2, four of its sixteen festivals
+    # - hariyaali_teej, gayatri_jayanti, narali_purnima and sanskrit_divas -
+    # return the date under "dates" (plural) instead of "date", which no other
+    # festival or month does. v3 fixes exactly those four; everything else in
+    # the response is identical, and v3 supports include_name and lan the same
+    # way. Verified against astroapi-3 on 2026-09-21.
+    #
+    # NOTE: shraavana_somvaar_vrat and mangla_gauri_vrat still use "dates" in
+    # v3, and that is CORRECT - they fall on every Monday / Tuesday of the
+    # month and return four dates as {"1": ..., "2": ...}. Do not "fix" them.
+    # The v2 bug was single string values mislabelled as plural.
     endpoint_map = {
-        "margashirsha": "margashirsh-festivals",
-        "pausha": "pausha-festivals",
-        "magha": "magha-festivals",
-        "phalguna": "phalguna-festivals",
-        "chaitra": "chaitra-festivals",
-        "vaishakha": "vaishakha-festivals",
-        "jyeshtha": "jyeshtha-festivals",
-        "ashadha": "ashada-festivals",
-        "shravana": "shraavana-festivals",
-        "bhadrapada": "bhadrapada-festivals",
-        "ashvina": "ashvina-festivals",
-        "kartika": "kartika-festivals",
+        "margashirsha": "v2/margashirsh-festivals",
+        "pausha": "v2/pausha-festivals",
+        "magha": "v2/magha-festivals",
+        "phalguna": "v2/phalguna-festivals",
+        "chaitra": "v2/chaitra-festivals",
+        "vaishakha": "v2/vaishakha-festivals",
+        "jyeshtha": "v2/jyeshtha-festivals",
+        "ashadha": "v2/ashada-festivals",
+        "shravana": "v3/shraavana-festivals",
+        "bhadrapada": "v2/bhadrapada-festivals",
+        "ashvina": "v2/ashvina-festivals",
+        "kartika": "v2/kartika-festivals",
     }
 
     payload = {"year": year, "place": place, "lat": lat, "lon": lon, "tzone": tzone}
@@ -2225,7 +2237,7 @@ async def divine_get_festivals_by_month(
     if err:
         return err
     api_key, auth_token = _get_credentials(ctx)
-    return await _call_divine_api(f"/indian-api/v2/{endpoint_map[month_lower]}", payload, api_key=api_key, auth_token=auth_token)
+    return await _call_divine_api(f"/indian-api/{endpoint_map[month_lower]}", payload, api_key=api_key, auth_token=auth_token)
 
 
 # ══════════════════════════════════════════════

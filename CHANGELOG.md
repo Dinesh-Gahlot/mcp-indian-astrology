@@ -1,5 +1,15 @@
 # Changelog
 
+## [2.10.1] - 2026-09-21
+
+### Fixed
+
+**`shraavana` festivals now use the v3 endpoint (DV-374).** In v2, four of the sixteen shraavana festivals — `hariyaali_teej`, `gayatri_jayanti`, `narali_purnima` and `sanskrit_divas` — returned their date under `"dates"` (plural) instead of `"date"`, which no other festival and no other Hindu month does. v3 corrects exactly those four. Everything else in the response is identical, and v3 supports `include_name` and `lan` the same way.
+
+`shraavana` is the **only** month with a v3 — all other eleven are v2-only, verified against astroapi-3. The endpoint map now carries the version per month rather than hardcoding `v2` in the URL, so a future month gaining a v3 is a one-word change.
+
+`shraavana_somvaar_vrat` and `mangla_gauri_vrat` still use `"dates"` in v3, and that is **correct** — they fall on every Monday and Tuesday of the month and return four dates as `{"1": ..., "2": ...}`. The v2 bug was single string values mislabelled as plural, not the plural key itself.
+
 ## [2.10.0] - 2026-09-17
 
 ### Added
