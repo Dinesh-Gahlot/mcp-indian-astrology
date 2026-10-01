@@ -1629,6 +1629,30 @@ async def divine_get_jaimini_planetary_positions(
     return await _call_divine_api("/indian-api/v2/jaimini-astrology/planetary-positions", payload, api_key=api_key, auth_token=auth_token)
 
 
+@mcp.tool(name="divine_get_jaimini_swamsa_chart", annotations=TOOL_ANNOTATIONS)
+async def divine_get_jaimini_swamsa_chart(
+    params: KundliInput = Field(..., description="Birth details"),
+    node_type: str | None = Field(default=None, description="Rahu/Ketu calculation method: 'meannode' (default) or 'truenode'"),
+    ctx: Context = None,
+) -> str:
+    """Generate the Jaimini Swamsa chart (Navamsa from the Karakamsha) as SVG and image.
+
+    The Navamsa (D9) planets recast into houses with the Karakamsha sign
+    (the Atmakaraka's D9 sign, Atmakaraka from the 7 planets Sun to Saturn)
+    as house 1. divine_get_jaimini_karakamsha_lagna recasts the natal D1
+    planets around that sign instead. Returns atmakaraka, swamsha_sign and
+    swamsha_sign_no, lagnamsha_sign and lagnamsha_sign_no (the D9 Ascendant),
+    svg, and base64_image. lan translates the names, not the sign numbers;
+    node_type only moves Rahu and Ketu in the chart.
+    """
+    payload = _kundli_payload(params)
+    err = _apply_node_type(payload, node_type)
+    if err:
+        raise ToolError(err)
+    api_key, auth_token = _get_credentials(ctx)
+    return await _call_divine_api("/indian-api/v1/swamsa-chart", payload, api_key=api_key, auth_token=auth_token)
+
+
 # ══════════════════════════════════════════════
 # KP (KRISHNAMURTI PADDHATI) — astroapi-3.divineapi.com
 # ══════════════════════════════════════════════
