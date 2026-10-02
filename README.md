@@ -93,7 +93,7 @@ claude mcp add divine-indian-astrology \
 
 ---
 
-## 📋 Available Tools (128 Total)
+## 📋 Available Tools (129 Total)
 
 ### 🗓️ Panchang (Daily Vedic Calendar) — 6 Tools
 
@@ -202,7 +202,7 @@ claude mcp add divine-indian-astrology \
 | `divine_get_sub_planet_positions` | Get sub-planet (Upagraha) positions for a birth chart |
 | `divine_get_sub_planet_chart` | Generate a sub-planet (Upagraha) chart as SVG and image |
 
-### 📜 Jaimini Astrology — 4 Tools
+### 📜 Jaimini Astrology - 5 Tools
 
 | Tool | Description |
 |------|-------------|
@@ -210,6 +210,7 @@ claude mcp add divine-indian-astrology \
 | `divine_get_jaimini_karakamsha_lagna` | Get Karakamsha Lagna from Jaimini astrology for a birth chart |
 | `divine_get_jaimini_padas` | Get Jaimini Padas (Arudha Padas) for all houses in a birth chart |
 | `divine_get_jaimini_planetary_positions` | Get Jaimini-specific planetary positions and karakas |
+| `divine_get_jaimini_swamsa_chart` | Generate the Jaimini Swamsa chart (Navamsa from the Karakamsha) as SVG and image |
 
 ### 🎯 KP (Krishnamurti Paddhati) — 5 Tools
 

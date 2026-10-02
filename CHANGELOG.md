@@ -1,5 +1,13 @@
 # Changelog
 
+## [2.11.0] - 2026-10-01
+
+### Added
+
+**New tool: `divine_get_jaimini_swamsa_chart` (DV-460).** Wraps the new `/indian-api/v1/swamsa-chart` endpoint (astroapi-3, backend PR Dinesh-Gahlot/astroapi-3.divineapi.com#23). The Jaimini Swamsa chart is the Navamsa (D9) chart's planets recast into houses with the Karakamsha sign (the Atmakaraka's D9 sign) as house 1. It takes the standard birth details (`KundliInput`, including `lan`) plus the optional `node_type` (`meannode`/`truenode`) that its sibling `divine_get_jaimini_karakamsha_lagna` also exposes, and returns `atmakaraka`, `swamsha_sign` / `swamsha_sign_no`, `lagnamsha_sign` / `lagnamsha_sign_no` (the D9 Ascendant's sign), `svg` and `base64_image`. With `lan="hi"` the names come back translated; the sign numbers do not change. `node_type=truenode` only moves Rahu and Ketu in the drawn chart (the Atmakaraka is one of the 7 planets Sun to Saturn, so the karaka and both signs stay the same); an invalid value comes back as a tool error (`isError: true`).
+
+It is a sibling of `divine_get_jaimini_karakamsha_lagna`, not a duplicate: that tool recasts the natal (D1) planets around the same Karakamsha sign, this one recasts the D9 planets. The route is top-level `/indian-api/v1/swamsa-chart`, not under `/jaimini-astrology/`. Endpoint live-verified (success=1) before adding, and the tool live-tested over stdio after. Tool count: 128 -> 129.
+
 ## [2.10.1] - 2026-09-21
 
 ### Fixed
