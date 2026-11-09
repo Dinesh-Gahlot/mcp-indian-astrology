@@ -93,7 +93,7 @@ claude mcp add divine-indian-astrology \
 
 ---
 
-## 📋 Available Tools (129 Total)
+## 📋 Available Tools (130 Total)
 
 ### 🗓️ Panchang (Daily Vedic Calendar) — 6 Tools
 
@@ -140,7 +140,7 @@ claude mcp add divine-indian-astrology \
 | `divine_get_muhurat_hora` | Get the Hora (planetary hour) timings for a given date and location |
 | `divine_get_muhurat_jain_pachakkhan` | Get the Jain Pachakkhan timings for a given date and location |
 
-### 🔮 Kundli (Birth Chart) Basics — 9 Tools
+### 🔮 Kundli (Birth Chart) Basics — 10 Tools
 
 | Tool | Description |
 |------|-------------|
@@ -153,6 +153,7 @@ claude mcp add divine-indian-astrology \
 | `divine_get_uday_lagna` | Get Uday Lagna (rising sign) timings for a given date and location |
 | `divine_get_chandramasa` | Get Chandramasa (Hindu lunar month) details for a given date and location |
 | `divine_get_chandrashtama` | Get Chandrashtama periods for a given month and location |
+| `divine_get_graha_drishti` | Get Graha Drishti (Vedic planetary aspects): which planets aspect which houses and planets |
 
 ### ⚠️ Doshas — 4 Tools
 
