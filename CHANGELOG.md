@@ -1,5 +1,22 @@
 # Changelog
 
+## [2.12.0] - 2026-11-09
+
+### Changed
+
+**`divine_get_kp_cuspal_sub` and `divine_get_kp_planetary_sub` now use the v2 endpoints (DV-589).** Both tools moved from `/indian-api/v1/kp/...` to `/indian-api/v2/kp/...` on astroapi-3 (backend PR Dinesh-Gahlot/astroapi-3.divineapi.com#35, parent ticket DV-579). Parameters are unchanged, and `node_type` and `lan` work on v2 as they did on v1.
+
+v2 adds KP aspect data to each row of `table_data`. Nothing existing is removed or renamed:
+
+| Tool | New fields per row |
+| --- | --- |
+| `divine_get_kp_cuspal_sub` | `aspected_by`: the planets aspecting that cusp |
+| `divine_get_kp_planetary_sub` | `conjunction`: planets within 5 degrees; `aspected_by`: planets aspecting it; `aspect_to`: `{planets, houses}` it aspects |
+
+KP aspects are Vedic aspects measured by degree. Every planet aspects the 7th (180 degrees); Mars also the 4th and 8th, Jupiter the 5th and 9th, and Saturn the 3rd and 10th. Rahu and Ketu cast no aspect. The orb is 8 degrees (Moon 12; Uranus, Neptune and Pluto 5). With `lan` other than `en`, the planet names in these lists are translated; house numbers are not.
+
+The v2 handler's nakshatra spelling fix ("Mrigshira" to "Mrigashira", "Shravana" to "Shravan") applies only to `cuspal`, which `divine_get_kp_cuspal` already called on v2. The significator table stays on v1: v2 does not serve it. Tool count unchanged at 129.
+
 ## [2.11.0] - 2026-10-01
 
 ### Added

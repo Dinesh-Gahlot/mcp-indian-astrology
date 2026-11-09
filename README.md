@@ -216,8 +216,8 @@ claude mcp add divine-indian-astrology \
 
 | Tool | Description |
 |------|-------------|
-| `divine_get_kp_cuspal_sub` | Get KP Cuspal Sub Lords for all house cusps |
-| `divine_get_kp_planetary_sub` | Get KP Planetary Sub Lords for all planets |
+| `divine_get_kp_cuspal_sub` | Get KP Cuspal Sub Lords for all house cusps, with the planets aspecting each cusp |
+| `divine_get_kp_planetary_sub` | Get KP Planetary Sub Lords for all planets, with each planet's conjunctions and aspects |
 | `divine_get_kp_cuspal_significator` | Get KP Planetary-Cuspal Significator Table |
 | `divine_get_kp_cuspal` | Get KP Cuspal chart data for a birth chart |
 | `divine_get_kp_planetary_positions` | Get KP Planetary Positions for a birth chart |
