@@ -1660,13 +1660,21 @@ async def divine_get_jaimini_swamsa_chart(
 
 @mcp.tool(name="divine_get_kp_cuspal_sub", annotations=TOOL_ANNOTATIONS)
 async def divine_get_kp_cuspal_sub(params: KundliInput, ctx: Context) -> str:
-    """Get KP Cuspal Sub Lords for all house cusps.
+    """Get KP Cuspal Sub Lords for all house cusps, with the planets aspecting each cusp.
 
-    Returns the sub lord of each house cusp, the primary factor for
-    KP-based predictions about that house's significations.
+    Returns table_data with one row per cusp: the rashi, nakshatra, sub and
+    sub-sub lords, each with the house it sits in and the houses it owns.
+    The sub lord is the primary factor for KP predictions about that
+    house's significations. Each row also has aspected_by, the planets that
+    aspect that cusp.
+
+    KP aspects are Vedic aspects measured by degree. Every planet aspects
+    the 7th (180 degrees); Mars also the 4th and 8th, Jupiter the 5th and
+    9th, Saturn the 3rd and 10th. Rahu and Ketu cast no aspect. Orb is 8
+    degrees (Moon 12; Uranus, Neptune and Pluto 5).
     """
     api_key, auth_token = _get_credentials(ctx)
-    return await _call_divine_api("/indian-api/v1/kp/cuspal-sub", _kundli_payload(params), api_key=api_key, auth_token=auth_token)
+    return await _call_divine_api("/indian-api/v2/kp/cuspal-sub", _kundli_payload(params), api_key=api_key, auth_token=auth_token)
 
 
 @mcp.tool(name="divine_get_kp_planetary_sub", annotations=TOOL_ANNOTATIONS)
@@ -1675,17 +1683,25 @@ async def divine_get_kp_planetary_sub(
     node_type: str | None = Field(default=None, description="Rahu/Ketu calculation method: 'meannode' (default) or 'truenode'"),
     ctx: Context = None,
 ) -> str:
-    """Get KP Planetary Sub Lords for all planets.
+    """Get KP Planetary Sub Lords for all planets, with each planet's conjunctions and aspects.
 
-    Returns the star lord and sub lord for each planet in the KP system,
-    essential for KP-based event prediction.
+    Returns table_data with one row per planet: the house it sits in and
+    the houses it owns, plus its nakshatra (star), sub and sub-sub lords
+    with theirs. Essential for KP-based event prediction. Each row also has:
+    conjunction (planets within 5 degrees), aspected_by (planets aspecting
+    it), and aspect_to with the planets and house cusps it aspects.
+
+    KP aspects are Vedic aspects measured by degree. Every planet aspects
+    the 7th (180 degrees); Mars also the 4th and 8th, Jupiter the 5th and
+    9th, Saturn the 3rd and 10th. Rahu and Ketu cast no aspect. Orb is 8
+    degrees (Moon 12; Uranus, Neptune and Pluto 5).
     """
     payload = _kundli_payload(params)
     err = _apply_node_type(payload, node_type)
     if err:
         return err
     api_key, auth_token = _get_credentials(ctx)
-    return await _call_divine_api("/indian-api/v1/kp/planetary-sub", payload, api_key=api_key, auth_token=auth_token)
+    return await _call_divine_api("/indian-api/v2/kp/planetary-sub", payload, api_key=api_key, auth_token=auth_token)
 
 
 @mcp.tool(name="divine_get_kp_cuspal_significator", annotations=TOOL_ANNOTATIONS)
