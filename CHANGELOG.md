@@ -1,5 +1,24 @@
 # Changelog
 
+## [2.15.0] - 2026-11-10
+
+### Added
+
+**Four new KP Prashna (horary) tools (DV-638).** They wrap the KP Prashna Kundali API on astroapi-3, `POST /indian-api/v1/kp-prashna/{chart,ruling-planets,dasha,instant-questions}` (backend PRs Dinesh-Gahlot/astroapi-3.divineapi.com#29 and #30, parent ticket DV-450). The backend charges them to API 42, so they need a plan that includes it: Vedic Prakash or Divine Infinity, not Vedic Ananta.
+
+| Tool | Endpoint | Input |
+| --- | --- | --- |
+| `divine_get_kp_prashna_instant_questions` | `/instant-questions` | none |
+| `divine_get_kp_prashna_chart` | `/chart` | `PrashnaInput`, `horary_number` (1-249), optional `node_type` |
+| `divine_get_kp_prashna_ruling_planets` | `/ruling-planets` | `PrashnaInput` |
+| `divine_get_kp_prashna_dasha` | `/dasha` | `PrashnaInput`, optional `depth` |
+
+`PrashnaInput` is a new model for the moment and place the question is asked, not birth details. The API requires `full_name` and `gender` but uses neither in the calculation, so the model defaults them to `Querent` and `other`; unlike the birth-chart models, `gender` also accepts `other`, as this API does. `horary_number` is checked as an integer from 1 to 249 before any call. `node_type` is offered only on the chart: the dasha only uses the Moon and the ruling planets use no node position, so it would have no effect there. There is no `lan`, because the backend sets the locale but never translates its output, so names come back in English.
+
+The dasha endpoint always returns the full 120-year Vimshottari tree, 819 periods (an estimated 70-75 KB of JSON). The tool's `depth` trims it before returning: `current` (only `current_dasha`), `mahadasha` (9 periods), `antardasha` (default; 9 + 81) or `full`. The result carries `dasha_timeline_depth` so the model knows the timeline was trimmed. The chart already includes `current_dasha`, so the dasha tool is only needed for the wider timeline.
+
+The server instructions now describe the horary flow: get the question's houses from the instant questions, build the chart with the querent's number, read those houses in `significators` and `current_dasha.houses_matching_current_dasha`. The API deliberately gives no yes/no verdict, and the descriptions say so. Tool count: 131 -> 135.
+
 ## [2.14.0] - 2026-11-09
 
 ### Added
