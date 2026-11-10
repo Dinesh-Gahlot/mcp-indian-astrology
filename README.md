@@ -93,7 +93,7 @@ claude mcp add divine-indian-astrology \
 
 ---
 
-## 📋 Available Tools (130 Total)
+## 📋 Available Tools (131 Total)
 
 ### 🗓️ Panchang (Daily Vedic Calendar) — 6 Tools
 
@@ -320,6 +320,12 @@ claude mcp add divine-indian-astrology \
 | `divine_get_month_sunrise_sunset_list` | Get daily sunrise and sunset times for a given month |
 | `divine_get_month_surya_nakshatra_list` | Get daily Surya (Sun) Nakshatra list for a given month |
 | `divine_get_month_tithi_list` | Get daily tithi list for a given month |
+
+### 📍 Location — 1 Tool
+
+| Tool | Description |
+|------|-------------|
+| `divine_search_location` | Search a place by name for its latitude, longitude and timezone (to fill the `place`, `lat`, `lon` and `tzone` inputs) |
 
 ## 🌐 Language Support
 
