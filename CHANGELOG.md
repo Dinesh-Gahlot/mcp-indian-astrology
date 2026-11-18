@@ -15,9 +15,18 @@
 
 `PrashnaInput` is a new model for the moment and place the question is asked, not birth details. The API requires `full_name` and `gender` but uses neither in the calculation, so the model defaults them to `Querent` and `other`; unlike the birth-chart models, `gender` also accepts `other`, as this API does. `horary_number` is checked as an integer from 1 to 249 before any call. `node_type` is offered only on the chart: the dasha only uses the Moon and the ruling planets use no node position, so it would have no effect there. There is no `lan`, because the backend sets the locale but never translates its output, so names come back in English.
 
-The dasha endpoint always returns the full 120-year Vimshottari tree, 819 periods (an estimated 70-75 KB of JSON). The tool's `depth` trims it before returning: `current` (only `current_dasha`), `mahadasha` (9 periods), `antardasha` (default; 9 + 81) or `full`. The result carries `dasha_timeline_depth` so the model knows the timeline was trimmed. The chart already includes `current_dasha`, so the dasha tool is only needed for the wider timeline.
+The dasha endpoint always returns the full 120-year Vimshottari tree, 819 periods: 68 KB as the API sends it, about 135 KB as the tool returns it (pretty-printed). The tool's `depth` trims it before returning: `current` (only `current_dasha`, about 0.5 KB), `mahadasha` (9 periods, about 1.7 KB), `antardasha` (default; 9 + 81, about 13 KB) or `full`. The result carries `dasha_timeline_depth` so the model knows the timeline was trimmed. The chart already includes `current_dasha`, so the dasha tool is only needed for the wider timeline.
 
 The server instructions now describe the horary flow: get the question's houses from the instant questions, build the chart with the querent's number, read those houses in `significators` and `current_dasha.houses_matching_current_dasha`. The API deliberately gives no yes/no verdict, and the descriptions say so. Tool count: 131 -> 135.
+
+Verified live on 2026-11-18 with a Vedic Prakash plan (Delhi, 2026-10-12 10:30, number 100):
+- All four endpoints answer `success: 1`, and the field names match the descriptions, so `depth` trims the real response.
+- `gender=other` is accepted. The API itself rejects `OTHER`; the tool lowercases it first.
+- `lan=hi` still returns English names (`Leo`, `Purva Phalguni`, `Sun`).
+- `node_type=truenode` moves Rahu from 302.99° to 304.53°.
+- `horary_number` 0, 250 or a non-number gets `success: 2` from the API; the tool rejects 0 and 250 before calling it.
+- The day lord follows the Vedic day: 04:30 on Thursday 2026-11-19 gives Mercury (Wednesday), 09:00 gives Jupiter.
+- The API requires `sec` ("Please enter valid second"), so the tool sends `0` when it is left out.
 
 ## [2.15.0] - 2026-11-10
 

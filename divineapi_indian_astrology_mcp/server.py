@@ -1985,7 +1985,7 @@ async def divine_get_kp_prashna_ruling_planets(
 @mcp.tool(name="divine_get_kp_prashna_dasha", annotations=TOOL_ANNOTATIONS)
 async def divine_get_kp_prashna_dasha(
     params: PrashnaInput = Field(..., description="When and where the question is asked"),
-    depth: str = Field(default="antardasha", description="How much of dasha_timeline to return: 'current' (none; current_dasha only), 'mahadasha' (9 periods), 'antardasha' (default; 9 mahadashas with their 81 antardashas) or 'full' (all 819 periods, a very large response)"),
+    depth: str = Field(default="antardasha", description="How much of dasha_timeline to return: 'current' (none; current_dasha only), 'mahadasha' (9 periods), 'antardasha' (default; 9 mahadashas with their 81 antardashas) or 'full' (all 819 periods, about 135 KB)"),
     ctx: Context = None,
 ) -> str:
     """Get the Vimshottari Dasha running when a KP Prashna question is asked, plus the 120-year timeline.
