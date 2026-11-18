@@ -93,7 +93,7 @@ claude mcp add divine-indian-astrology \
 
 ---
 
-## 📋 Available Tools (131 Total)
+## 📋 Available Tools (135 Total)
 
 ### 🗓️ Panchang (Daily Vedic Calendar) — 6 Tools
 
@@ -222,6 +222,17 @@ claude mcp add divine-indian-astrology \
 | `divine_get_kp_cuspal_significator` | Get KP Planetary-Cuspal Significator Table |
 | `divine_get_kp_cuspal` | Get KP Cuspal chart data for a birth chart |
 | `divine_get_kp_planetary_positions` | Get KP Planetary Positions for a birth chart |
+
+### ❓ KP Prashna (Horary) — 4 Tools
+
+Answers one specific question from a number the querent thinks of (1–249) and the moment and place the question is asked. The API returns chart data and significators, not a yes/no verdict.
+
+| Tool | Description |
+|------|-------------|
+| `divine_get_kp_prashna_instant_questions` | List the question categories (marriage, job, health, ...) and the houses that answer each one |
+| `divine_get_kp_prashna_chart` | Build the horary chart: cusps, planets, house and planet significators, and the dasha running at that moment |
+| `divine_get_kp_prashna_ruling_planets` | Get the seven KP Ruling Planets (day lord, Moon and Ascendant sign/star/sub lords) for a moment and place |
+| `divine_get_kp_prashna_dasha` | Get the Vimshottari Dasha from the moment of the question, with the timeline trimmed to the depth you ask for |
 
 ### 🚀 Transits — 6 Tools
 
