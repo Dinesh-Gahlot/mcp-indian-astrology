@@ -1,6 +1,6 @@
 # Changelog
 
-## [2.15.0] - 2026-11-10
+## [2.16.0] - 2026-11-18
 
 ### Added
 
@@ -18,6 +18,19 @@
 The dasha endpoint always returns the full 120-year Vimshottari tree, 819 periods (an estimated 70-75 KB of JSON). The tool's `depth` trims it before returning: `current` (only `current_dasha`), `mahadasha` (9 periods), `antardasha` (default; 9 + 81) or `full`. The result carries `dasha_timeline_depth` so the model knows the timeline was trimmed. The chart already includes `current_dasha`, so the dasha tool is only needed for the wider timeline.
 
 The server instructions now describe the horary flow: get the question's houses from the instant questions, build the chart with the querent's number, read those houses in `significators` and `current_dasha.houses_matching_current_dasha`. The API deliberately gives no yes/no verdict, and the descriptions say so. Tool count: 131 -> 135.
+
+## [2.15.0] - 2026-11-10
+
+### Added
+
+**`weekday` option on four tools (DV-469).** `divine_get_basic_astro_details`, `divine_get_varshphal_varsha_pravesh`, `divine_get_varshphal_basic_astro_details` and `divine_get_lal_kitab_varsha_pravesh` take an optional `weekday`: `civil` or `vedic` (backend PR Dinesh-Gahlot/astroapi-3.divineapi.com#24, parent ticket DV-453).
+
+- `civil` (the API default) changes the day at midnight, like a calendar.
+- `vedic` changes it at local sunrise, so a moment between midnight and sunrise still belongs to the previous day.
+
+It changes `vaar` in the two basic-astro-details tools and `weekday` in the two Varsha Pravesh tools; nothing else in the response moves. Left out, nothing is sent and the API uses `civil`, so existing calls return what they did before. Case doesn't matter; any other value is a tool error (`isError: true`) raised before the API is called.
+
+Verified live on 2026-11-10 (Delhi, born 1990-05-24 04:30, a Thursday, sunrise 05:25): `vaar` is Thursday with `civil` and Wednesday with `vedic`; the 2025 Varsha Pravesh (2025-05-24 03:54) is Saturday with `civil` and Friday with `vedic`. The Lal Kitab tool could not be run live, because the test account has no Lal Kitab plan. Tool count unchanged at 131.
 
 ## [2.14.0] - 2026-11-09
 
